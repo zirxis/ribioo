@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم البائع - ريبيو</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Authentication System -->
+    <script src="auth.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --forest-green: #2D5016;
+            --sage-green: #87A96B;
+            --warm-cream: #F8F6F0;
+            --rich-earth: #8B4513;
+            --soft-mint: #E8F5E8;
+            --golden-honey: #DAA520;
+            --charcoal-gray: #36454F;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f8fafc;
+            direction: rtl;
+        }
+        
+        .font-display {
+            font-family: 'El Messiri', serif;
+        }
+        
+        .sidebar {
+            background: linear-gradient(180deg, var(--rich-earth) 0%, var(--golden-honey) 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-link {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            border-right: 3px solid transparent;
+        }
+        
+        .sidebar-link:hover, .sidebar-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-right-color: var(--warm-cream);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(139, 69, 19, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--rich-earth), var(--golden-honey));
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(139, 69, 19, 0.15);
+        }
+        
+        .order-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+        }
+        
+        .order-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(139, 69, 19, 0.1);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ff9800;
+        }
+        
+        .status-confirmed {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+        
+        .status-shipped {
+            background: rgba(156, 39, 176, 0.1);
+            color: #9c27b0;
+        }
+        
+        .status-delivered {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .status-cancelled {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            right: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--sage-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .text-gradient {
+            background: linear-gradient(135deg, var(--forest-green), var(--sage-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .toggle-sidebar {
+            transition: all 0.3s ease;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .table-row {
+            transition: all 0.3s ease;
+        }
+        
+        .table-row:hover {
+            background: rgba(139, 69, 19, 0.05);
+        }
+        
+        .mobile-sidebar {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-sidebar.active {
+            transform: translateX(0);
+        }
+        
+        .mobile-overlay {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* New Styles for Enhanced Features */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .analytics-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .filter-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(139, 69, 19, 0.1);
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--charcoal-gray);
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--golden-honey);
+            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.2);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+        
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: #ff9800;
+        }
+        
+        .badge-danger {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+        
+        .notification-item {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item:hover {
+            background: #f9fafb;
+        }
+        
+        .notification-item.unread {
+            background: rgba(33, 150, 243, 0.05);
+        }
+        
+        .inventory-low {
+            background: rgba(255, 193, 7, 0.05);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .inventory-out {
+            background: rgba(244, 67, 54, 0.05);
+            border-left: 4px solid #f44336;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #374151;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+    <!-- Mobile Sidebar Overlay -->
+    <div class="mobile-overlay fixed inset-0 bg-black/50 z-40 md:hidden" id="mobileOverlay"></div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar w-64 flex-shrink-0 h-full overflow-y-auto hidden md:flex flex-col text-white p-6">
+        <!-- Logo -->
+        <div class="flex items-center mb-10">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                <span class="text-lg">🌿</span>
+            </div>
+            <div>
+                <h1 class="font-display text-xl font-bold">Ribio</h1>
+                <p class="text-xs opacity-80">لوحة البائع</p>
+            </div>
+        </div>
+        
+        <!-- Seller Info -->
+        <div class="bg-white/10 rounded-xl p-4 mb-8">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-xl">
+                    <i class="fas fa-store"></i>
+                </div>
+                <div class="mr-3">
+                    <h3 class="font-bold" id="seller-name">متجر الأعشاب الطبيعية</h3>
+                    <p class="text-xs opacity-80">البائع المميز</p>
+                </div>
+            </div>
+            <div class="mt-3 pt-3 border-t border-white/20">
+                <div class="flex justify-between text-xs">
+                    <span>التقييم:</span>
+                    <span class="flex items-center">
+                        <i class="fas fa-star text-yellow-400 ml-1"></i>
+                        4.8
+                    </span>
+                </div>
+                <div class="flex justify-between text-xs mt-1">
+                    <span>المبيعات:</span>
+                    <span>1,245,000 دج</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex-1">
+            <ul class="space-y-2">
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt ml-3"></i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="products">
+                        <i class="fas fa-box ml-3"></i>
+                        <span>المنتجات</span>
+                        <span class="badge badge-warning mr-auto" id="low-stock-badge">5</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="orders">
+                        <i class="fas fa-shopping-cart ml-3"></i>
+                        <span>الطلبات</span>
+                        <span class="badge badge-warning mr-auto" id="pending-orders-badge">12</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="customers">
+                        <i class="fas fa-users ml-3"></i>
+                        <span>العملاء</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="analytics">
+                        <i class="fas fa-chart-bar ml-3"></i>
+                        <span>التقارير والإحصائيات</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="promotions">
+                        <i class="fas fa-percentage ml-3"></i>
+                        <span>العروض والتخفيضات</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="store">
+                        <i class="fas fa-store-alt ml-3"></i>
+                        <span>إعدادات المتجر</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="support">
+                        <i class="fas fa-headset ml-3"></i>
+                        <span>الدعم والمساعدة</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <!-- Footer -->
+        <div class="pt-6 border-t border-white/20">
+            <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" onclick="logout()">
+                <i class="fas fa-sign-out-alt ml-3"></i>
+                <span>تسجيل الخروج</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Mobile Sidebar -->
+    <div class="mobile-sidebar fixed top-0 right-0 h-full w-64 z-50 bg-gradient-to-b from-[#8B4513] to-[#DAA520] md:hidden">
+        <div class="p-6 h-full flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mr-3">
+                        <span class="text-lg">🌿</span>
+                    </div>
+                    <div>
+                        <h1 class="font-display text-xl font-bold text-white">Ribio</h1>
+                        <p class="text-xs text-white/80">لوحة البائع</p>
+                    </div>
+                </div>
+                <button class="text-white text-xl" onclick="toggleMobileSidebar()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg active" data-section="dashboard" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-tachometer-alt ml-3"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="products" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-box ml-3"></i>
+                            <span>المنتجات</span>
+                            <span class="badge badge-warning mr-auto">5</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="orders" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-shopping-cart ml-3"></i>
+                            <span>الطلبات</span>
+                            <span class="badge badge-warning mr-auto">12</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="customers" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-users ml-3"></i>
+                            <span>العملاء</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="analytics" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-chart-bar ml-3"></i>
+                            <span>التقارير والإحصائيات</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="promotions" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-percentage ml-3"></i>
+                            <span>العروض والتخفيضات</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="store" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-store-alt ml-3"></i>
+                            <span>إعدادات المتجر</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" data-section="support" onclick="toggleMobileSidebar()">
+                            <i class="fas fa-headset ml-3"></i>
+                            <span>الدعم والمساعدة</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Footer -->
+            <div class="pt-6 border-t border-white/20">
+                <a href="#" class="sidebar-link flex items-center p-3 rounded-lg" onclick="logout()">
+                    <i class="fas fa-sign-out-alt ml-3"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Navigation -->
+        <header class="bg-white border-b border-gray-200 py-4 px-6 flex items-center justify-between">
+            <div class="flex items-center">
+                <button class="toggle-sidebar text-charcoal-gray mr-4 md:hidden" onclick="toggleMobileSidebar()">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <h2 class="font-display text-2xl font-bold text-charcoal-gray" id="page-title">لوحة التحكم</h2>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Notifications -->
+                <div class="relative">
+                    <button class="text-charcoal-gray hover:text-sage-green transition-colors relative" id="notifications-button">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <!-- Notifications Dropdown -->
+                    <div class="absolute left-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 hidden z-10 border border-gray-200 max-h-96 overflow-y-auto" id="notifications-dropdown">
+                        <div class="px-4 py-2 border-b border-gray-200">
+                            <h3 class="font-bold text-charcoal-gray">الإشعارات</h3>
+                        </div>
+                        
+                        <div class="notification-item unread">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-charcoal-gray">طلب جديد #ORD-7850</p>
+                                    <p class="text-xs text-gray-500 mt-1">تم استلام طلب جديد بقيمة 2,340 دج</p>
+                                </div>
+                                <span class="text-xs text-gray-400">منذ 5 دقائق</span>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-charcoal-gray">تقييم جديد</p>
+                                    <p class="text-xs text-gray-500 mt-1">محمد أحمد قام بتقييم منتجك بـ 5 نجوم</p>
+                                </div>
+                                <span class="text-xs text-gray-400">منذ ساعة</span>
+                            </div>
+                        </div>
+                        
+                        <div class="notification-item">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-charcoal-gray">منتج منخفض المخزون</p>
+                                    <p class="text-xs text-gray-500 mt-1">صابون الأعشاب الطبيعي: 3 قطع متبقية فقط</p>
+                                </div>
+                                <span class="text-xs text-gray-400">منذ 3 ساعات</span>
+                            </div>
+                        </div>
+                        
+                        <div class="px-4 py-2 border-t border-gray-200 text-center">
+                            <a href="#" class="text-sm text-sage-green hover:text-forest-green font-medium">عرض جميع الإشعارات</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative">
+                    <button class="flex items-center space-x-2 space-x-reverse text-charcoal-gray" id="user-menu-button">
+                        <div class="w-10 h-10 bg-sage-green rounded-full flex items-center justify-center text-white font-bold">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="hidden md:block">أحمد البائع</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden z-10 border border-gray-200" id="user-menu">
+                        <a href="#" class="block px-4 py-2 text-charcoal-gray hover:bg-gray-100">
+                            <i class="fas fa-user ml-2"></i>
+                            الملف الشخصي
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-charcoal-gray hover:bg-gray-100">
+                            <i class="fas fa-cog ml-2"></i>
+                            الإعدادات
+                        </a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <a href="#" class="block px-4 py-2 text-charcoal-gray hover:bg-gray-100" onclick="logout()">
+                            <i class="fas fa-sign-out-alt ml-2"></i>
+                            تسجيل الخروج
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Role Switch -->
+                <button onclick="switchRole()" class="text-charcoal-gray hover:text-sage-green transition-colors text-sm font-medium px-3 py-2 rounded-full bg-soft-mint hover:bg-sage-green hover:text-white hidden md:block">
+                    <span id="role-switch-text">🛒 تصفح كمشتري</span>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-50">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="stat-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">إجمالي المبيعات</p>
+                                <h3 class="text-2xl font-bold text-charcoal-gray">1,245,000 دج</h3>
+                                <p class="text-green-500 text-sm mt-1">
+                                    <i class="fas fa-arrow-up ml-1"></i>
+                                    12% زيادة
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                                <i class="fas fa-chart-line text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">الطلبات الجديدة</p>
+                                <h3 class="text-2xl font-bold text-charcoal-gray">24</h3>
+                                <p class="text-blue-500 text-sm mt-1">
+                                    <i class="fas fa-clock ml-1"></i>
+                                    تحتاج معالجة
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">المنتجات</p>
+                                <h3 class="text-2xl font-bold text-charcoal-gray">58</h3>
+                                <p class="text-yellow-500 text-sm mt-1">
+                                    <i class="fas fa-box ml-1"></i>
+                                    5 منخفضة المخزون
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center text-yellow-600">
+                                <i class="fas fa-boxes text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">تقييم المتجر</p>
+                                <h3 class="text-2xl font-bold text-charcoal-gray">4.8/5</h3>
+                                <p class="text-purple-500 text-sm mt-1">
+                                    <i class="fas fa-star ml-1"></i>
+                                    من 124 تقييم
+                                </p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                                <i class="fas fa-star text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts and Analytics -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Sales Chart -->
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">مبيعات آخر 7 أيام</h3>
+                        <div class="chart-container">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Products Chart -->
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">المنتجات الأكثر مبيعاً</h3>
+                        <div class="chart-container">
+                            <canvas id="productsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders and Products -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-display text-xl font-bold text-charcoal-gray">الطلبات الأخيرة</h3>
+                            <a href="#" class="text-sage-green hover:text-forest-green text-sm font-medium" data-section="orders">عرض الكل</a>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="order-card p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-bold text-charcoal-gray">طلب #ORD-7842</h4>
+                                        <p class="text-gray-500 text-sm">من: محمد أحمد</p>
+                                    </div>
+                                    <span class="status-badge status-pending">قيد الانتظار</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-charcoal-gray font-semibold">2,450 دج</p>
+                                    <p class="text-gray-500 text-sm">منذ 2 ساعة</p>
+                                </div>
+                            </div>
+                            
+                            <div class="order-card p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-bold text-charcoal-gray">طلب #ORD-7841</h4>
+                                        <p class="text-gray-500 text-sm">من: فاطمة الزهراء</p>
+                                    </div>
+                                    <span class="status-badge status-confirmed">تم التأكيد</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-charcoal-gray font-semibold">1,780 دج</p>
+                                    <p class="text-gray-500 text-sm">منذ 5 ساعات</p>
+                                </div>
+                            </div>
+                            
+                            <div class="order-card p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div>
+                                        <h4 class="font-bold text-charcoal-gray">طلب #ORD-7840</h4>
+                                        <p class="text-gray-500 text-sm">من: يوسف خالد</p>
+                                    </div>
+                                    <span class="status-badge status-shipped">تم الشحن</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <p class="text-charcoal-gray font-semibold">3,120 دج</p>
+                                    <p class="text-gray-500 text-sm">منذ يوم</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Low Stock Products -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-display text-xl font-bold text-charcoal-gray">منتجات منخفضة المخزون</h3>
+                            <a href="#" class="text-sage-green hover:text-forest-green text-sm font-medium" data-section="products">عرض الكل</a>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="product-card p-4 flex items-center inventory-low">
+                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                    <img src="https://via.placeholder.com/64" alt="صابون أعشاب" class="w-full h-full object-cover">
+                                </div>
+                                <div class="mr-4 flex-1">
+                                    <h4 class="font-bold text-charcoal-gray">صابون الأعشاب الطبيعي</h4>
+                                    <p class="text-gray-500 text-sm">3 قطع متبقية</p>
+                                </div>
+                                <div class="text-left">
+                                    <button class="bg-sage-green text-white px-3 py-1 rounded-lg text-sm hover:bg-forest-green transition-colors">
+                                        تجديد
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="product-card p-4 flex items-center inventory-low">
+                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                    <img src="https://via.placeholder.com/64" alt="زيت اللوز" class="w-full h-full object-cover">
+                                </div>
+                                <div class="mr-4 flex-1">
+                                    <h4 class="font-bold text-charcoal-gray">زيت اللوز الحلو</h4>
+                                    <p class="text-gray-500 text-sm">0 قطع متبقية</p>
+                                </div>
+                                <div class="text-left">
+                                    <button class="bg-sage-green text-white px-3 py-1 rounded-lg text-sm hover:bg-forest-green transition-colors">
+                                        تجديد
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="product-card p-4 flex items-center inventory-low">
+                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden">
+                                    <img src="https://via.placeholder.com/64" alt="شامبو طبيعي" class="w-full h-full object-cover">
+                                </div>
+                                <div class="mr-4 flex-1">
+                                    <h4 class="font-bold text-charcoal-gray">شامبو الأعشاب الطبيعي</h4>
+                                    <p class="text-gray-500 text-sm">5 قطع متبقية</p>
+                                </div>
+                                <div class="text-left">
+                                    <button class="bg-sage-green text-white px-3 py-1 rounded-lg text-sm hover:bg-forest-green transition-colors">
+                                        تجديد
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="mt-8 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-charcoal-gray mb-6">إجراءات سريعة</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <button class="btn-primary py-4 rounded-xl font-semibold flex items-center justify-center" onclick="openAddProductModal()">
+                            <i class="fas fa-plus ml-2"></i>
+                            إضافة منتج جديد
+                        </button>
+                        
+                        <button class="bg-white border border-sage-green text-sage-green py-4 rounded-xl font-semibold flex items-center justify-center hover:bg-sage-green hover:text-white transition-colors" data-section="orders">
+                            <i class="fas fa-eye ml-2"></i>
+                            عرض الطلبات
+                        </button>
+                        
+                        <button class="bg-white border border-golden-honey text-golden-honey py-4 rounded-xl font-semibold flex items-center justify-center hover:bg-golden-honey hover:text-white transition-colors" data-section="analytics">
+                            <i class="fas fa-chart-pie ml-2"></i>
+                            التقارير
+                        </button>
+                        
+                        <button class="bg-white border border-charcoal-gray text-charcoal-gray py-4 rounded-xl font-semibold flex items-center justify-center hover:bg-charcoal-gray hover:text-white transition-colors" data-section="store">
+                            <i class="fas fa-cog ml-2"></i>
+                            إعدادات المتجر
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Products Section -->
+            <section id="products" class="content-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-display text-2xl font-bold text-charcoal-gray">إدارة المنتجات</h2>
+                    <button class="btn-primary px-6 py-3 rounded-xl font-semibold flex items-center" onclick="openAddProductModal()">
+                        <i class="fas fa-plus ml-2"></i>
+                        إضافة منتج جديد
+                    </button>
+                </div>
+                
+                <!-- Filter Bar -->
+                <div class="filter-bar">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div class="flex flex-col md:flex-row gap-4">
+                            <select class="form-select w-full md:w-auto">
+                                <option>جميع الفئات</option>
+                                <option>زيوت طبيعية</option>
+                                <option>أعشاب طبية</option>
+                                <option>عسل طبيعي</option>
+                                <option>صابون طبيعي</option>
+                            </select>
+                            
+                            <select class="form-select w-full md:w-auto">
+                                <option>جميع الحالات</option>
+                                <option>متوفر</option>
+                                <option>منخفض المخزون</option>
+                                <option>غير متوفر</option>
+                            </select>
+                            
+                            <input type="text" placeholder="بحث في المنتجات..." class="form-input w-full md:w-64">
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <button class="bg-white border border-gray-300 text-charcoal-gray px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-filter ml-2"></i>
+                                تصفية
+                            </button>
+                            <button class="bg-white border border-gray-300 text-charcoal-gray px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-download ml-2"></i>
+                                تصدير
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">المنتج</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">السعر</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">المخزون</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">المبيعات</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">الحالة</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="table-row">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 bg-gray-200 rounded-lg flex-shrink-0 overflow-hidden ml-4">
+                                                <img src="https://via.placeholder.com/48" alt="زيت الزيتون" class="w-full h-full object-cover">
+                                            </div>
+                                            <div>
+                                                <h4 class="font-bold text-charcoal-gray">زيت الزيتون البكر</h4>
+                                                <p class="text-gray-500 text-sm">منتج طبيعي</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <p class="text-charcoal-gray font-semibold">1,200 دج</p>
+                                        <p class="text-gray-500 text-sm line-through">1,500 دج</p>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <p class="text-charcoal-gray">45</p>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <p class="text-charcoal-gray">48</p>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <span class="status-badge status-delivered">متوفر</span>
+                                    </td>
+                                    <td class="py-4 px-4">
+                                        <div class="flex space-x-2 space-x-reverse">
+                                            <button class="text-blue-500 hover:text-blue-700 tooltip" data-tooltip="تعديل">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="text-green-500 hover:text-green-700 tooltip" data-tooltip="عرض">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-red-500 hover:text-red-700 tooltip" data-tooltip="حذف">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                                <!-- More product rows would go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                        <p class="text-gray-500 text-sm">عرض 1-4 من 58 منتج</p>
+                        <div class="flex space-x-2">
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-sage-green text-white rounded-lg">1</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">2</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">3</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Orders Section -->
+            <section id="orders" class="content-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-display text-2xl font-bold text-charcoal-gray">إدارة الطلبات</h2>
+                    <div class="flex space-x-4">
+                        <select class="form-select">
+                            <option>جميع الحالات</option>
+                            <option>قيد الانتظار</option>
+                            <option>تم التأكيد</option>
+                            <option>تم الشحن</option>
+                            <option>تم التوصيل</option>
+                            <option>ملغي</option>
+                        </select>
+                        <input type="text" placeholder="بحث في الطلبات..." class="form-input w-64">
+                    </div>
+                </div>
+                
+                <!-- Orders Table -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">رقم الطلب</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">العميل</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">التاريخ</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">المبلغ</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">الحالة</th>
+                                    <th class="py-3 px-4 text-right font-semibold text-charcoal-gray">الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- Order rows would go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div class="px-6 py-4 border-t border-gray-200 flex justify-between items-center">
+                        <p class="text-gray-500 text-sm">عرض 1-4 من 24 طلب</p>
+                        <div class="flex space-x-2">
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-sage-green text-white rounded-lg">1</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">2</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">3</button>
+                            <button class="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-500 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Analytics Section -->
+            <section id="analytics" class="content-section">
+                <div class="mb-8">
+                    <h2 class="font-display text-2xl font-bold text-charcoal-gray mb-2">التقارير والإحصائيات</h2>
+                    <p class="text-gray-600">تحليل أداء متجرك واتخاذ قرارات أفضل بناءً على البيانات</p>
+                </div>
+                
+                <!-- Date Range Filter -->
+                <div class="filter-bar mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4">
+                        <div class="flex items-center gap-4">
+                            <span class="font-medium text-charcoal-gray">الفترة الزمنية:</span>
+                            <select class="form-select">
+                                <option>آخر 7 أيام</option>
+                                <option>آخر 30 يوم</option>
+                                <option>آخر 3 أشهر</option>
+                                <option>آخر سنة</option>
+                                <option>فترة مخصصة</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <span class="font-medium text-charcoal-gray">مقارنة مع:</span>
+                            <select class="form-select">
+                                <option>لا يوجد مقارنة</option>
+                                <option>الفترة السابقة</option>
+                                <option>نفس الفترة العام الماضي</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn-primary px-6 py-2 rounded-lg">
+                            تطبيق التصفية
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Analytics Grid -->
+                <div class="dashboard-grid mb-8">
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">إجمالي المبيعات</h3>
+                        <div class="chart-container">
+                            <canvas id="totalSalesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">الطلبات حسب الحالة</h3>
+                        <div class="chart-container">
+                            <canvas id="ordersStatusChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">المبيعات حسب الفئة</h3>
+                        <div class="chart-container">
+                            <canvas id="salesByCategoryChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="analytics-card">
+                        <h3 class="font-display text-xl font-bold text-charcoal-gray mb-4">أداء المنتجات</h3>
+                        <div class="chart-container">
+                            <canvas id="productsPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Detailed Reports -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-charcoal-gray mb-6">تقارير مفصلة</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center p-4 border border-gray-200 rounded-lg">
+                            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-charcoal-gray mb-2">تقرير الطلبات</h4>
+                            <p class="text-gray-500 text-sm mb-4">تحليل مفصل لجميع الطلبات وتطورها</p>
+                            <button class="btn-primary w-full py-2 rounded-lg text-sm">
+                                تحميل التقرير
+                            </button>
+                        </div>
+                        
+                        <div class="text-center p-4 border border-gray-200 rounded-lg">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
+                                <i class="fas fa-chart-line text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-charcoal-gray mb-2">تقرير المبيعات</h4>
+                            <p class="text-gray-500 text-sm mb-4">تحليل أداء المبيعات والإيرادات</p>
+                            <button class="btn-primary w-full py-2 rounded-lg text-sm">
+                                تحميل التقرير
+                            </button>
+                        </div>
+                        
+                        <div class="text-center p-4 border border-gray-200 rounded-lg">
+                            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center text-purple-600 mx-auto mb-4">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-charcoal-gray mb-2">تقرير العملاء</h4>
+                            <p class="text-gray-500 text-sm mb-4">تحليل سلوك العملاء وتفضيلاتهم</p>
+                            <button class="btn-primary w-full py-2 rounded-lg text-sm">
+                                تحميل التقرير
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Promotions Section -->
+            <section id="promotions" class="content-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-display text-2xl font-bold text-charcoal-gray">العروض والتخفيضات</h2>
+                    <button class="btn-primary px-6 py-3 rounded-xl font-semibold flex items-center" onclick="openAddPromotionModal()">
+                        <i class="fas fa-plus ml-2"></i>
+                        إضافة عرض جديد
+                    </button>
+                </div>
+                
+                <!-- Active Promotions -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
+                    <h3 class="font-display text-xl font-bold text-charcoal-gray mb-6">العروض النشطة</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="border border-golden-honey rounded-xl p-4 bg-amber-50">
+                            <div class="flex justify-between items-start mb-4">
+                                <h4 class="font-bold text-charcoal-gray">تخفيضات الربيع</h4>
+                                <span class="badge badge-success">نشط</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">خصم 20% على جميع منتجات العناية بالبشرة</p>
+                            <div class="flex justify-between text-sm text-gray-500">
+                                <span>ينتهي في: 15/06/2024</span>
+                                <span>12 منتج</span>
+                            </div>
+                        </div>
+                        
+                        <!-- More promotion cards would go here -->
+                    </div>
+                </div>
+                
+                <!-- Create Promotion Form -->
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                    <h3 class="font-display text-xl font-bold text-charcoal-gray mb-6">إنشاء عرض جديد</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            <label class="form-label">اسم العرض</label>
+                            <input type="text" class="form-input" placeholder="أدخل اسم العرض">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">نوع الخصم</label>
+                            <select class="form-select">
+                                <option>نسبة مئوية</option>
+                                <option>مبلغ ثابت</option>
+                                <option>شحن مجاني</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">قيمة الخصم</label>
+                            <input type="number" class="form-input" placeholder="أدخل قيمة الخصم">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">تاريخ الانتهاء</label>
+                            <input type="date" class="form-input">
+                        </div>
+                        
+                        <div class="form-group md:col-span-2">
+                            <label class="form-label">المنتجات المشمولة</label>
+                            <select class="form-select" multiple>
+                                <option>زيت الزيتون البكر</option>
+                                <option>عسل السدر الطبيعي</option>
+                                <option>صابون الأعشاب الطبيعي</option>
+                                <option>زيت اللوز الحلو</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end mt-6">
+                        <button class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                            حفظ العرض
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Other sections would be implemented similarly -->
+            <section id="customers" class="content-section">
+                <div class="text-center py-12">
+                    <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="font-display text-2xl font-bold text-charcoal-gray mb-2">قسم العملاء</h3>
+                    <p class="text-gray-500">سيتم إضافة محتوى هذا القسم قريباً</p>
+                </div>
+            </section>
+            
+            <section id="store" class="content-section">
+                <div class="text-center py-12">
+                    <i class="fas fa-store-alt text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="font-display text-2xl font-bold text-charcoal-gray mb-2">قسم إعدادات المتجر</h3>
+                    <p class="text-gray-500">سيتم إضافة محتوى هذا القسم قريباً</p>
+                </div>
+            </section>
+            
+            <section id="support" class="content-section">
+                <div class="text-center py-12">
+                    <i class="fas fa-headset text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="font-display text-2xl font-bold text-charcoal-gray mb-2">قسم الدعم والمساعدة</h3>
+                    <p class="text-gray-500">سيتم إضافة محتوى هذا القسم قريباً</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div class="modal-overlay" id="addProductModal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-display text-2xl font-bold text-charcoal-gray">إضافة منتج جديد</h3>
+                <button class="text-charcoal-gray hover:text-sage-green text-2xl" onclick="closeAddProductModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="addProductForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">اسم المنتج</label>
+                        <input type="text" class="form-input" placeholder="أدخل اسم المنتج" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">السعر (دج)</label>
+                        <input type="number" class="form-input" placeholder="أدخل السعر" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الفئة</label>
+                        <select class="form-select" required>
+                            <option value="">اختر الفئة</option>
+                            <option value="oils">زيوت طبيعية</option>
+                            <option value="herbs">أعشاب طبية</option>
+                            <option value="honey">عسل طبيعي</option>
+                            <option value="soap">صابون طبيعي</option>
+                            <option value="supplements">مكملات غذائية</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">الكمية في المخزون</label>
+                        <input type="number" class="form-input" placeholder="أدخل الكمية" required>
+                    </div>
+                    
+                    <div class="form-group md:col-span-2">
+                        <label class="form-label">وصف المنتج</label>
+                        <textarea class="form-textarea h-32" placeholder="أدخل وصف المنتج" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">صورة المنتج</label>
+                        <input type="file" class="form-input" accept="image/*">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">حالة المنتج</label>
+                        <select class="form-select" required>
+                            <option value="active">نشط</option>
+                            <option value="inactive">غير نشط</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" class="bg-gray-200 text-charcoal-gray px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors" onclick="closeAddProductModal()">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="btn-primary px-6 py-3 rounded-lg font-semibold">
+                        <span id="submit-button-text">إضافة المنتج</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // التحقق من تسجيل الدخول
+        function checkLogin() {
+            if (!requireLogin()) {
+                return false;
+            }
+            return true;
+        }
+        
+        // تعيين الدور كبائع عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحقق من تسجيل الدخول
+            if (!checkLogin()) return;
+            
+            // تحميل بيانات البائع
+            loadSellerData();
+            
+            localStorage.setItem('userRole', 'seller');
+            updateRoleSwitchButton();
+            initializeCharts();
+            
+            // إضافة حدث النقر على عناصر القائمة الجانبية
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // إزالة النشاط من جميع الروابط
+                    document.querySelectorAll('.sidebar-link').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    
+                    // إضافة النشاط للرابط المحدد
+                    this.classList.add('active');
+                    
+                    // إظهار القسم المحدد
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                    
+                    // تحديث عنوان الصفحة
+                    updatePageTitle(sectionId);
+                });
+            });
+            
+            // إضافة حدث النقر على أزرار الإجراءات السريعة
+            document.querySelectorAll('.btn-primary, .bg-white').forEach(button => {
+                if (button.getAttribute('data-section')) {
+                    button.addEventListener('click', function() {
+                        const sectionId = this.getAttribute('data-section');
+                        showSection(sectionId);
+                        updatePageTitle(sectionId);
+                        
+                        // تحديث القائمة الجانبية
+                        document.querySelectorAll('.sidebar-link').forEach(item => {
+                            item.classList.remove('active');
+                            if (item.getAttribute('data-section') === sectionId) {
+                                item.classList.add('active');
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // إضافة حدث النقر على زر الإشعارات
+            document.getElementById('notifications-button').addEventListener('click', function() {
+                document.getElementById('notifications-dropdown').classList.toggle('hidden');
+            });
+            
+            // إضافة حدث النقر على زر القائمة المنسدلة للمستخدم
+            document.getElementById('user-menu-button').addEventListener('click', function() {
+                document.getElementById('user-menu').classList.toggle('hidden');
+            });
+            
+            // إغلاق القوائم المنسدلة عند النقر خارجها
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('#notifications-button') && !e.target.closest('#notifications-dropdown')) {
+                    document.getElementById('notifications-dropdown').classList.add('hidden');
+                }
+                
+                if (!e.target.closest('#user-menu-button') && !e.target.closest('#user-menu')) {
+                    document.getElementById('user-menu').classList.add('hidden');
+                }
+            });
+            
+            // إضافة حدث إرسال نموذج إضافة منتج
+            document.getElementById('addProductForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitProductForm();
+            });
+        });
+        
+        // عرض القسم المحدد وإخفاء الآخرين
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        // تحديث عنوان الصفحة بناءً على القسم النشط
+        function updatePageTitle(sectionId) {
+            const titles = {
+                'dashboard': 'لوحة التحكم',
+                'products': 'إدارة المنتجات',
+                'orders': 'إدارة الطلبات',
+                'customers': 'إدارة العملاء',
+                'analytics': 'التقارير والإحصائيات',
+                'promotions': 'العروض والتخفيضات',
+                'store': 'إعدادات المتجر',
+                'support': 'الدعم والمساعدة'
+            };
+            
+            document.getElementById('page-title').textContent = titles[sectionId] || 'لوحة التحكم';
+        }
+        
+        // تبديل القائمة الجانبية للجوال
+        function toggleMobileSidebar() {
+            document.getElementById('mobileOverlay').classList.toggle('active');
+            document.querySelector('.mobile-sidebar').classList.toggle('active');
+        }
+        
+        // تبديل الدور بين البائع والمشتري
+        function switchRole() {
+            localStorage.setItem('userRole', 'buyer');
+            window.location.href = 'index2.html';
+        }
+        
+        // تحديث نص زر تبديل الدور
+        function updateRoleSwitchButton() {
+            const role = localStorage.getItem('userRole');
+            const buttonText = document.getElementById('role-switch-text');
+            const mobileButtonText = document.getElementById('mobile-role-switch-text');
+            
+            if (role === 'seller') {
+                buttonText.textContent = '🛒 تصفح كمشتري';
+                if (mobileButtonText) mobileButtonText.textContent = '🛒 تصفح كمشتري';
+            } else {
+                buttonText.textContent = '👤 بائع؟';
+                if (mobileButtonText) mobileButtonText.textContent = '👤 بائع؟';
+            }
+        }
+        
+        // تسجيل الخروج
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.removeItem('userRole');
+                window.location.href = 'index.html';
+            }
+        }
+        
+        // فتح نموذج إضافة منتج
+        function openAddProductModal() {
+            document.getElementById('addProductModal').classList.add('active');
+        }
+        
+        // إغلاق نموذج إضافة منتج
+        function closeAddProductModal() {
+            document.getElementById('addProductModal').classList.remove('active');
+        }
+        
+        // فتح نموذج إضافة عرض
+        function openAddPromotionModal() {
+            alert('سيتم فتح نموذج إضافة عرض جديد هنا');
+            // يمكنك استبدال هذا بتنفيذ نموذج إضافة عرض
+        }
+        
+        // إرسال نموذج إضافة منتج
+        function submitProductForm() {
+            const submitButton = document.querySelector('#addProductForm button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            // عرض حالة التحميل
+            submitButton.innerHTML = '<div class="loading"></div> جاري الإضافة...';
+            submitButton.disabled = true;
+            
+            // محاكاة عملية الإرسال
+            setTimeout(() => {
+                // إعادة تعيين النموذج
+                document.getElementById('addProductForm').reset();
+                
+                // إغلاق النموذج
+                closeAddProductModal();
+                
+                // عرض رسالة نجاح
+                alert('تم إضافة المنتج بنجاح!');
+                
+                // إعادة تعيين الزر
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }, 2000);
+        }
+        
+        // تهيئة المخططات البيانية
+        function initializeCharts() {
+            // مخطط المبيعات الأسبوعي
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
+                    datasets: [{
+                        label: 'المبيعات (دج)',
+                        data: [120000, 190000, 150000, 180000, 220000, 170000, 200000],
+                        borderColor: '#87A96B',
+                        backgroundColor: 'rgba(135, 169, 107, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' دج';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // مخطط المنتجات الأكثر مبيعاً
+            const productsCtx = document.getElementById('productsChart').getContext('2d');
+            new Chart(productsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['زيت الزيتون', 'عسل السدر', 'صابون أعشاب', 'زيت اللوز', 'شامبو طبيعي'],
+                    datasets: [{
+                        label: 'عدد المبيعات',
+                        data: [48, 36, 29, 22, 18],
+                        backgroundColor: [
+                            'rgba(135, 169, 107, 0.7)',
+                            'rgba(218, 165, 32, 0.7)',
+                            'rgba(139, 69, 19, 0.7)',
+                            'rgba(45, 80, 22, 0.7)',
+                            'rgba(232, 245, 232, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(135, 169, 107)',
+                            'rgb(218, 165, 32)',
+                            'rgb(139, 69, 19)',
+                            'rgb(45, 80, 22)',
+                            'rgb(232, 245, 232)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            
+            // يمكنك إضافة المزيد من المخططات هنا
+        }
+        
+        // تحميل بيانات البائع
+        function loadSellerData() {
+            const name = sellerAuth.getSellerName();
+            const email = sellerAuth.getSellerEmail();
+            
+            if (document.getElementById('seller-name')) {
+                document.getElementById('seller-name').textContent = name;
+            }
+        }
+        
+        // تحديث دالة تسجيل الخروج
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                sellerAuth.logout();
+                window.location.href = 'seller-login.html';
+            }
+        }
+    </script>
+</body>
+</html>
